@@ -9,6 +9,7 @@
 !Fonts/
 !Images/
 !src/
+!src/utils
 
 # Allow specific file types (in any non-ignored directory)
 !*.cpp
