@@ -1,41 +1,27 @@
-# Prerequisites
-*.d
+# Ignore everything
+*
 
-# Compiled Object files
-*.slo
-*.lo
+# But NOT these folders and files (must also un-ignore the parent path!)
+!glad/
+!glm/
+!Shaders/
+!Textures/
+!Fonts/
+!Images/
+
+# Allow specific file types (in any non-ignored directory)
+!*.cpp
+!*.c
+!*.h
+!*.hpp
+!*.md
+!*.fs
+!*.vs
+!*.png
+!Makefile
+!*.ttf
+
+# Optional: Ignore build output
+main
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
 *.out
-*.app
-
-# debug information files
-*.dwo
