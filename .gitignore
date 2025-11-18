@@ -8,6 +8,7 @@
 !Textures/
 !Fonts/
 !Images/
+!src/
 
 # Allow specific file types (in any non-ignored directory)
 !*.cpp
