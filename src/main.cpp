@@ -1,16 +1,18 @@
 
-#include "glad/glad.h"
+#include "../glad/glad.h"
 #include <GLFW/glfw3.h>
 
 #include "game.h"
-#include "resourceManager.h"
-#include "textRenderer.h"
+#include "utils/resourceManager.h"
+#include "utils/textRenderer.h"
 
 #include <iostream>
 
 // GLFW function declarations
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void mouse_button_callback(GLFWwindow* window, int key, int action, int mode);
+void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 
 // Calculate FPS function
 void showFPS(float& fpsLastTime, unsigned int& fpsFrameCount);
@@ -51,7 +53,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // GLFW callbacks
     glfwSetKeyCallback(window, key_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // OpenGL configuration
@@ -107,7 +112,7 @@ int main(int argc, char *argv[])
         // ------
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        // Engine.Render();
+        Engine.Render();
         
 
         // FPS Counter
@@ -128,16 +133,40 @@ int main(int argc, char *argv[])
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    // // when a user presses the escape key, we set the WindowShouldClose property to true, closing the application
-    // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    //     glfwSetWindowShouldClose(window, true);
-    // if (key >= 0 && key < 1024)
-    // {
-    //     if (action == GLFW_PRESS)
-    //         Engine.Keys[key] = true;
-    //     else if (action == GLFW_RELEASE)
-    //         Engine.Keys[key] = false;
-    // }
+    // when a user presses the escape key, we set the WindowShouldClose property to true, closing the application
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    if (key >= 0 && key < 1024)
+    {
+        if (action == GLFW_PRESS)
+            Engine.Keys[key] = true;
+        else if (action == GLFW_RELEASE)
+            Engine.Keys[key] = false;
+    }
+}
+
+void mouse_button_callback(GLFWwindow* window, int key, int action, int mode) {
+
+    if (key == GLFW_MOUSE_BUTTON_LEFT) {
+
+        if(action == GLFW_PRESS) 
+            Engine.MouseKeys[key] = true;
+        
+        else if (action == GLFW_RELEASE)
+            Engine.MouseKeys[key] = false;  
+    }
+}
+
+void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
+
+    // Save the cursor coordinate everyime the left key is pressed
+    if (Engine.MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
+
+        Engine.MouseX = xpos;
+        Engine.MouseY = ypos;
+
+        std::cout << "Cursor Position at " << Engine.MouseX << " : " << Engine.MouseY << std::endl;
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

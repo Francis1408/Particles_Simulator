@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "glad/glad.h"
+#include "../glad/glad.h"
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -19,6 +19,8 @@ class Game {
     // game state
     GameState State;
     bool Keys[1024]; // Array of keys
+    bool MouseKeys[8];
+    double MouseX, MouseY;
     unsigned int Width, Height; // Width and Height of the window
     int action; // Key action type
 

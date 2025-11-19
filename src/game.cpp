@@ -1,11 +1,11 @@
 #include "game.h"
-#include "resourceManager.h"
-#include "spriteRenderer.h"
+#include "utils/resourceManager.h"
+#include "utils/spriteRenderer.h"
 
 // GLM Mathematics Library headers
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+#include "../glm/gtc/type_ptr.hpp"
 
 #include <iostream>
 #include <vector>

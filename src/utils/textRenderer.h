@@ -3,7 +3,7 @@
 #define TEXTRENDERER_H
 
 
-#include "glad/glad.h"
+#include "../../glad/glad.h"
 #include "resourceManager.h"
 
 #include "texture.h"

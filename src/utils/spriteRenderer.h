@@ -3,7 +3,7 @@
 #define SPRITERENDERER_H
 
 
-#include "glad/glad.h"
+#include "../../glad/glad.h"
 
 #include "texture.h"
 #include "shader.h"

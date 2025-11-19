@@ -5,12 +5,26 @@ CXX = g++
 CFLAGS = -fdiagnostics-color=always -g
 
 # Directories
-SRC_DIR = .
+SRC_DIR = src
+UTILS_DIR = src/utils
 GLAD_DIR = glad
+BUILD_DIR = build
 
 # Source files
-CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp)
+CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp) \
+			$(wildcard $(UTILS_DIR)/*.cpp)
 GLAD_FILES = $(wildcard $(GLAD_DIR)/*.c)
+
+
+# Tell make where to find source files
+vpath %.cpp $(SRC_DIR) $(UTILS_DIR)
+vpath %.c   $(GLAD_DIR)
+
+# Object files (flattened into build/)
+OBJ_CPP  = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(notdir $(CPP_FILES)))
+OBJ_GLAD = $(patsubst %.c,  $(BUILD_DIR)/%.o, $(notdir $(GLAD_FILES)))
+
+OBJS = $(OBJ_CPP) $(OBJ_GLAD)
 
 # Output binary
 OUT = main
@@ -25,8 +39,19 @@ LIBS = -lGL -lglfw $(FREETYPE_LIBS)
 # Build target
 all: $(OUT)
 
-$(OUT): $(CPP_FILES) $(GLAD_FILES)
-	$(CXX) $(CFLAGS) $(FREETYPE_CFLAGS) $^ -o $@ $(LIBS)
+# Link step
+$(OUT): $(OBJS)
+	$(CXX) $^ -o $@ $(LIBS)
+
+# Compile C++ files
+$(BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(CFLAGS) $(FREETYPE_CFLAGS) -c $< -o $@
+
+# Compile C files
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 # Run target
 run: $(OUT)
@@ -34,4 +59,4 @@ run: $(OUT)
 
 # Clean target
 clean:
-	rm -f $(OUT)
+	rm -f $(BUILD_DIR) $(OUT)
