@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     // initialize game
     // ---------------
-    // Engine.Init(argc, argv);
+    Engine.Init(argc, argv);
     
 
     // Create the text shader

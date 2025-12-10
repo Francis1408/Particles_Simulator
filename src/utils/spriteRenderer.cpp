@@ -54,7 +54,7 @@ void SpriteRenderer::initRenderData()
 }
 
     
-void SpriteRenderer::DrawSprite(Texture2D &texture, glm::vec2 position, 
+void SpriteRenderer::DrawSprite(glm::vec2 position, 
 glm::vec2 size, float rotate, glm::vec3 color, glm::vec2 pivot)
   {
       // prepare transformations
@@ -82,7 +82,7 @@ glm::vec2 size, float rotate, glm::vec3 color, glm::vec2 pivot)
       this->shader.SetVec3("spriteColor", color);
     
       glActiveTexture(GL_TEXTURE0);
-      texture.Bind();
+    //   texture.Bind();
   
       glBindVertexArray(this->quadVAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);

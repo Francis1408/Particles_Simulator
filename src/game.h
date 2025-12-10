@@ -30,16 +30,6 @@ class Game {
     // ZBuffer
     std::vector<float> ZBuffer;
 
-    // Array of sprite distances
-    std::vector<float> spriteDistance;
-    // Array to store the order of the sprites from fartest to the nearst
-    std::vector<int> spriteOrder;
-
-    // Number of sprites avaiable
-    unsigned int numSprites;
-
-    unsigned int Level;
-
     // Constructor
     Game(unsigned int width, unsigned int height);
 
