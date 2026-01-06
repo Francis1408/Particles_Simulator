@@ -61,7 +61,7 @@ void Game::Init(int argc, char* argv[])
     gridTexture = new Texture2D(GL_RGBA, GL_RGBA, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
 
-    this->grid.resize(this->Width * this->Height);
+    this->grid.resize(this->Width * this->Height, 0);
     this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
 
     std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0);
@@ -92,20 +92,29 @@ void Game::Render()
     if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
         glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
-        std::cout << static_cast<int>(this->MouseY * this->MouseX) + static_cast<int>(this->MouseX) << std::endl;
+        int x = (int) this->MouseX;
+        int y = (int) this->MouseY;
 
-        // this->grid[static_cast<int>(this->MouseY * this->MouseX) + static_cast<int>(this->MouseX)] = 1;
-        
+        if (x >= 0 && x < Width && y >= 0 && y < Height) {
 
-        // for(int i = 0; i < grid.size(); i++) {
-        //     switch (grid[i]) {
-        //         case 1: this->pixel_buffer[i] = 0xFFFFFFFF;break;
-        //     }
-        // }
+             
+            int index = y * Width + x;
 
-        // gridTexture->Update(this->pixel_buffer.data()); 
+            std::cout << index << std::endl;
+
+            this->grid[index] = 1;
+            
+            
+            this->pixel_buffer[index * 4] = 255;
+            this->pixel_buffer[index * 4 + 1] = 255;
+            this->pixel_buffer[index * 4 + 2] = 255;
+            this->pixel_buffer[index * 4 + 3] = 255; 
+               
+
+            gridTexture->Update(this->pixel_buffer.data()); 
+        }
+
     }
-
 
     GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height));
 
