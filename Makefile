@@ -59,4 +59,4 @@ run: $(OUT)
 
 # Clean target
 clean:
-	rm -f $(BUILD_DIR) $(OUT)
+	rm -rf $(BUILD_DIR) $(OUT)

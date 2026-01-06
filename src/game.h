@@ -36,6 +36,10 @@ class Game {
     // Destructor
     ~Game();
 
+    int pixel_size;
+    float gridCols;
+    float gridRows;
+
     // Game Grids
     std::vector<uint8_t> grid;
     std::vector<uint8_t> pixel_buffer;

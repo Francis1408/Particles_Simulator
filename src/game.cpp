@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm> 
 #include <filesystem>
+#include <cmath>
 
 SpriteRenderer *CubeRenderer;
 SpriteRenderer *GridRenderer;
@@ -57,11 +58,16 @@ void Game::Init(int argc, char* argv[])
     Shader Shader = ResourceManager::GetShader("grid");
     GridRenderer = new SpriteRenderer(Shader);
 
+    pixel_size = 8;
+
+    gridCols = Width/pixel_size;
+    gridRows =  Height/pixel_size;
+
     // Declaring grid texture
     gridTexture = new Texture2D(GL_RGBA, GL_RGBA, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
 
-    this->grid.resize(this->Width * this->Height, 0);
+    this->grid.resize(gridCols * gridRows, 0);
     this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
 
     std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0);
@@ -90,30 +96,51 @@ void Game::Render()
 {
    
     if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
-        glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
+        // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
         int x = (int) this->MouseX;
         int y = (int) this->MouseY;
 
-        if (x >= 0 && x < Width && y >= 0 && y < Height) {
+        // Check if it is not out of bounds
+        if (x >=  0 && x < Width && y >= 0 && y < Height) {
+ 
+            // Re-scale for the grid cell
+            int cellX = x / pixel_size;
+            int cellY = y / pixel_size;
 
-             
-            int index = y * Width + x;
+            // Check if it is not out of bounds
+            if (cellX >= 0 && cellX < gridCols &&
+                cellY >= 0 && cellY < gridRows) {
+   
+                // Exact cell (cube) which the mouse is on
+                int cellIndex = cellY * gridCols + cellX;
+                this->grid[cellIndex] = 1;
 
-            std::cout << index << std::endl;
+                // Get the top-left pixel_buffer coordinate
+                int startX = cellX * pixel_size;
+                int startY = cellY * pixel_size;
+                
+                for (int dy = 0; dy < pixel_size; dy++) {
+                    for (int dx = 0; dx < pixel_size; dx++) {
 
-            this->grid[index] = 1;
-            
-            
-            this->pixel_buffer[index * 4] = 255;
-            this->pixel_buffer[index * 4 + 1] = 255;
-            this->pixel_buffer[index * 4 + 2] = 255;
-            this->pixel_buffer[index * 4 + 3] = 255; 
-               
+                        int px = startX + dx;
+                        int py = startY + dy;
+                        
+                        // Fills the pixels that belong to the grid
+                        // Horizontally(right) to vertically(down)
+                        int pixelIndex = (py * Width + px) * 4;
 
-            gridTexture->Update(this->pixel_buffer.data()); 
+                        pixel_buffer[pixelIndex + 0] = 255;
+                        pixel_buffer[pixelIndex + 1] = 255;
+                        pixel_buffer[pixelIndex + 2] = 255;
+                        pixel_buffer[pixelIndex + 3] = 255;
+                    }
+                }
+            }
         }
-
+        
+        gridTexture->Update(this->pixel_buffer.data()); 
+    
     }
 
     GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height));
