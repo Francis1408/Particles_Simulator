@@ -33,58 +33,6 @@ Shader ResourceManager::GetShader(std::string name)
 }
 
 
-void ResourceManager::LoadTextures(const std::string& path_str)
-{
-    // Create the directory path
-    fs::path path(path_str);
-
-    // Create a temporary vector to store the entries
-    std::vector<fs::directory_entry> entries;
-
-    // Check if it is the right path
-    if(!fs::exists(path) || !fs::is_directory(path)) {
-
-        std::cerr << "ERROR : Invalid directory path." << std::endl;
-    }
-
-    // Store all file paths in the string array
-    for(const auto& entry : fs::directory_iterator(path)) {
-        if (fs::is_regular_file(entry)) {
-            entries.push_back(entry);
-        }
-    }
-
-    // Sort the entries by numeric filename, since the fs picks the files randomly
-                                              // Lambda funtion - inline function that saves sorted list into []  
-    std::sort(entries.begin(), entries.end(), [](const fs::directory_entry& a, const fs::directory_entry&b) {
-
-        // gets the path -> remove the extensions name -> transform into string
-        int aIndex = std::stoi(a.path().stem().string()); // transform to a int the file name 
-        int bIndex = std::stoi(b.path().stem().string());
-        return aIndex < bIndex;
-    });
-   
-    
-
-    // Check if there are texture avaiable
-    if(entries.empty()) throw std::runtime_error("No textures avaiable");
-
-
-    // Load the textures into the Textures map
-    // The textures will have an index of [1: num_of_textures]
-    for(const auto& entry : entries) {
-        std::string fullPath = entry.path().string();
-        int id = std::stoi(entry.path().stem().string()); // get the int from file name
-    
-        std::cout << "Loading texture id " << id << ": " << fullPath << std::endl;
-        Textures[id] = loadTextureFromFile(fullPath.c_str(), false);
-    
-    }
-
-
-}
-
-
 Texture2D ResourceManager::GetTexture(int index)
 {
     return Textures[index];
@@ -165,34 +113,34 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile, const char *
     return shader;
 }
 
-Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)
-{
-    // create texture object
-    Texture2D texture;
-    if (alpha)
-    {
-        texture.Internal_Format = GL_RGBA;
-        texture.Image_Format = GL_RGBA;
-    }
-    // load image
-    int width, height, nrChannels;
+// Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)
+// {
+//     // create texture object
+//     Texture2D texture;
+//     if (alpha)
+//     {
+//         texture.Internal_Format = GL_RGBA;
+//         texture.Image_Format = GL_RGBA;
+//     }
+//     // load image
+//     int width, height, nrChannels;
 
-    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
-    if(data) {
+//     unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+//     if(data) {
         
-        // Save image on the cpu-side buffer
-        texture.PixelBuffer.assign(data, data + width * height * nrChannels);
+//         // Save image on the cpu-side buffer
+//         texture.PixelBuffer.assign(data, data + width * height * nrChannels);
 
-        // now generate texture
-        texture.Generate(width, height, data);
+//         // now generate texture
+//         texture.Generate(width, height, data);
         
-    } else {
+//     } else {
         
-        std::cout << "Failed to load texture" << std::endl;
-    }
+//         std::cout << "Failed to load texture" << std::endl;
+//     }
 
-    // and finally free image data
-    stbi_image_free(data);
-    return texture;
-}
+//     // and finally free image data
+//     stbi_image_free(data);
+//     return texture;
+// }
 

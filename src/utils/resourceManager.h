@@ -28,8 +28,6 @@ public:
     static Shader    LoadShader(const char *vShaderFile, const char *fShaderFile, const char *gShaderFile, std::string name);
     // retrieves a stored sader
     static Shader    GetShader(std::string name);
-    // loads texture from /Textures* directory
-    static void LoadTextures(const std::string& path_str);
     // retrieves a stored texture
     static Texture2D GetTexture(int index);
     // loads an instance of character
@@ -46,7 +44,7 @@ private:
     // loads and generates a shader from file
     static Shader    loadShaderFromFile(const char *vShaderFile, const char *fShaderFile, const char *gShaderFile = nullptr);
     // loads a single texture from file
-    static Texture2D loadTextureFromFile(const char *file, bool alpha);
+    // static Texture2D loadTextureFromFile(const char *file, bool alpha);
 };
 
 #endif

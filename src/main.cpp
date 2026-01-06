@@ -165,7 +165,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
         Engine.MouseX = xpos;
         Engine.MouseY = ypos;
 
-        std::cout << "Cursor Position at " << Engine.MouseX << " : " << Engine.MouseY << std::endl;
+        std::cout << "Cursor Position at X:" << Engine.MouseX << " Y: " << Engine.MouseY << std::endl;
     }
 }
 
