@@ -18,6 +18,8 @@ SpriteRenderer *GridRenderer;
 Texture2D *gridTexture;
 
 
+
+
 // Constructor
 Game::Game(unsigned int width, unsigned int height) 
     : State(GAME_ACTIVE), Keys(), Width(width), Height(height)
@@ -60,9 +62,15 @@ void Game::Init(int argc, char* argv[])
 
 
     this->grid.resize(this->Width * this->Height);
-    this->pixel_buffer.resize(this->Width * this->Height);
+    this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
 
-    std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0x00000000);
+    std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0);
+    // Make alpha visible
+    for (int i = 0; i < Width * Height; i++)
+    {
+        pixel_buffer[i * 4 + 3] = 255; // Alpha
+    }
+
     gridTexture->Generate(Width, Height, this->pixel_buffer.data());
 
 
@@ -84,18 +92,22 @@ void Game::Render()
     if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
         glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
-        this->grid[static_cast<int>(this->MouseY * this->MouseX) + static_cast<int>(this->MouseX)] = 1;
+        std::cout << static_cast<int>(this->MouseY * this->MouseX) + static_cast<int>(this->MouseX) << std::endl;
+
+        // this->grid[static_cast<int>(this->MouseY * this->MouseX) + static_cast<int>(this->MouseX)] = 1;
         
 
-        for(int i = 0; i < grid.size(); i++) {
-            switch (grid[i]) {
-                case 1: this->pixel_buffer[i] = 0xFFFFFFFF;break;
-            }
-        }
+        // for(int i = 0; i < grid.size(); i++) {
+        //     switch (grid[i]) {
+        //         case 1: this->pixel_buffer[i] = 0xFFFFFFFF;break;
+        //     }
+        // }
 
-        gridTexture->Update(this->pixel_buffer.data()); 
+        // gridTexture->Update(this->pixel_buffer.data()); 
     }
 
+
+    GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height));
 
 }
 

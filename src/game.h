@@ -36,6 +36,10 @@ class Game {
     // Destructor
     ~Game();
 
+    // Game Grids
+    std::vector<uint8_t> grid;
+    std::vector<uint8_t> pixel_buffer;
+
     // Initialize game state (load all shaders/textures/levels)
     void Init(int argc, char* argv[]);
 
