@@ -51,6 +51,10 @@ class Game {
     void ProcessInput(float dt);
     void Update(float dt);
     void Render();
+    void Simulator();
+    bool Down(int currentCell);
+    bool DownLeft(int currentCell);
+    bool DownRight(int currentCell);
 
 };
 

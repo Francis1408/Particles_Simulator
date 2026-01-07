@@ -147,4 +147,95 @@ void Game::Render()
 
 }
 
+void Game::Simulator() {
+
+    // Iterates through the cell grid and appylies the blocks interactions
+
+    for (int i = 0; i < this->grid.size(); i++) {
+
+        // Checks if the action was not applied to the cell
+        bool visited = ((this->grid[i] >> 7) & 0);
+
+        if (!visited) {
+
+            if(!this->Down(i))
+                if(!this->DownLeft(i))
+                     this->DownRight(i);
+
+        }
+        
+    }
+
+}
+
+bool Game::Down(int currentCell) {
+
+    int downCell = currentCell + gridRows;
+    // Boundary check
+    if (downCell >= 0 && downCell < grid.size()) {
+
+        // Check if space is available
+        if (this->grid[downCell] != 1) {
+            this->grid[downCell] = 1;
+            // Mark as visited
+            this->grid[downCell] |= (1 << 7);
+            return true;
+        }
+        return false;      
+    }
+    return false;
+}
+
+bool Game::DownLeft(int currentCell) {
+
+    int leftCell =  currentCell + gridRows - 1;
+    
+    int currentCellRow = (int) currentCell/gridRows;
+    int leftCellRow = (int) leftCell/gridRows;
+    // Boundary check
+    if (leftCell >= 0 && leftCell < grid.size() &&
+    leftCellRow > currentCellRow) { // If they are not on the same row
+        
+        // Check if space is available
+        if (this->grid[leftCell] != 1) {
+            this->grid[leftCell] = 1;
+            // Mark as visited
+            this->grid[leftCell] |= (1 << 7);
+
+            return true;    
+        }
+        return false;
+    }
+
+    return false;
+}
+
+bool Game::DownRight(int currentCell) {
+
+    int rightCell = currentCell + gridRows + 1;
+
+    int currentCellRow = (int) currentCell/gridRows;
+    int rightCellRow = (int) rightCell/gridRows;
+
+    // Boundary check
+    if(rightCell >= 0 && rightCell < grid.size() &&
+    currentCellRow + 1 == rightCellRow) {
+
+        // Check if space is available
+        if (this->grid[rightCell] != 1) {
+            this->grid[rightCell] = 1;
+            // Mark as visited
+            this->grid[rightCell] |= (1 << 7);
+
+            return true;    
+        }
+        return false;
+
+    }
+
+    return false;
+}
+
+
+
 
