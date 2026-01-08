@@ -37,8 +37,8 @@ class Game {
     ~Game();
 
     int pixel_size;
-    float gridCols;
-    float gridRows;
+    int gridCols;
+    int gridRows;
 
     // Game Grids
     std::vector<uint8_t> grid;

@@ -95,54 +95,58 @@ void Game::ProcessInput(float dt)
 void Game::Render()
 {
    
-    if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
-        // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
+    // if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
+    //     // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
-        int x = (int) this->MouseX;
-        int y = (int) this->MouseY;
+    //     int x = (int) this->MouseX;
+    //     int y = (int) this->MouseY;
 
-        // Check if it is not out of bounds
-        if (x >=  0 && x < Width && y >= 0 && y < Height) {
+    //     // Check if it is not out of bounds
+    //     if (x >=  0 && x < Width && y >= 0 && y < Height) {
  
-            // Re-scale for the grid cell
-            int cellX = x / pixel_size;
-            int cellY = y / pixel_size;
+    //         // Re-scale for the grid cell
+    //         int cellX = x / pixel_size;
+    //         int cellY = y / pixel_size;
 
-            // Check if it is not out of bounds
-            if (cellX >= 0 && cellX < gridCols &&
-                cellY >= 0 && cellY < gridRows) {
+    //         // Check if it is not out of bounds
+    //         if (cellX >= 0 && cellX < gridCols &&
+    //             cellY >= 0 && cellY < gridRows) {
    
-                // Exact cell (cube) which the mouse is on
-                int cellIndex = cellY * gridCols + cellX;
-                this->grid[cellIndex] = 1;
+    //             // Exact cell (cube) which the mouse is on
+    //             int cellIndex = cellY * gridCols + cellX;
+    //             this->grid[cellIndex] = 1;
 
-                // Get the top-left pixel_buffer coordinate
-                int startX = cellX * pixel_size;
-                int startY = cellY * pixel_size;
+    //             // Get the top-left pixel_buffer coordinate
+    //             int startX = cellX * pixel_size;
+    //             int startY = cellY * pixel_size;
                 
-                for (int dy = 0; dy < pixel_size; dy++) {
-                    for (int dx = 0; dx < pixel_size; dx++) {
+    //             for (int dy = 0; dy < pixel_size; dy++) {
+    //                 for (int dx = 0; dx < pixel_size; dx++) {
 
-                        int px = startX + dx;
-                        int py = startY + dy;
+    //                     int px = startX + dx;
+    //                     int py = startY + dy;
                         
-                        // Fills the pixels that belong to the grid
-                        // Horizontally(right) to vertically(down)
-                        int pixelIndex = (py * Width + px) * 4;
+    //                     // Fills the pixels that belong to the grid
+    //                     // Horizontally(right) to vertically(down)
+    //                     int pixelIndex = (py * Width + px) * 4;
 
-                        pixel_buffer[pixelIndex + 0] = 255;
-                        pixel_buffer[pixelIndex + 1] = 255;
-                        pixel_buffer[pixelIndex + 2] = 255;
-                        pixel_buffer[pixelIndex + 3] = 255;
-                    }
-                }
-            }
-        }
+    //                     pixel_buffer[pixelIndex + 0] = 255;
+    //                     pixel_buffer[pixelIndex + 1] = 255;
+    //                     pixel_buffer[pixelIndex + 2] = 255;
+    //                     pixel_buffer[pixelIndex + 3] = 255;
+    //                 }
+    //             }
+    //         }
+    //     }
         
-        gridTexture->Update(this->pixel_buffer.data()); 
     
-    }
+    // }
 
+    this->grid[30] = 1;
+
+    this->Simulator();
+    
+    gridTexture->Update(this->pixel_buffer.data()); 
     GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height));
 
 }
@@ -151,34 +155,79 @@ void Game::Simulator() {
 
     // Iterates through the cell grid and appylies the blocks interactions
 
+    for (int y = gridRows - 2; y >= 0; y--) {
+        for (int x = 0; x < gridCols; x++) {
+
+            int i = y * gridCols + x;
+            
+            // Checks if the action was not applied to the cell
+            bool visited = ((this->grid[i] >> 7) & 1);
+        
+            if (!visited) {
+        
+                if(!this->Down(i))
+                    if(!this->DownLeft(i))
+                         this->DownRight(i);
+            }   
+        }
+    
+    }
+
+    // Clear visited cells
+    for (auto& cell : grid) {
+        cell &= 0x7F; // clear MSB
+    }
+
+
+    // Update pixelBuffer
     for (int i = 0; i < this->grid.size(); i++) {
 
-        // Checks if the action was not applied to the cell
-        bool visited = ((this->grid[i] >> 7) & 0);
+        int cellX = i % gridCols;
+        int cellY = i / gridCols;
 
-        if (!visited) {
+        int startX = cellX * pixel_size;
+        int startY = cellY * pixel_size;
 
-            if(!this->Down(i))
-                if(!this->DownLeft(i))
-                     this->DownRight(i);
+        for (int dy = 0; dy < pixel_size; dy++) {
+            for (int dx = 0; dx < pixel_size; dx++) {
 
+                int px = startX + dx;
+                int py = startY + dy;
+
+                int pixelIndex = (py * Width + px) * 4;
+
+                if (grid[i] & 1) {
+                    pixel_buffer[pixelIndex + 0] = 255;
+                    pixel_buffer[pixelIndex + 1] = 255;
+                    pixel_buffer[pixelIndex + 2] = 255;
+                    pixel_buffer[pixelIndex + 3] = 255;
+                } else {
+                    pixel_buffer[pixelIndex + 0] = 0;
+                    pixel_buffer[pixelIndex + 1] = 0;
+                    pixel_buffer[pixelIndex + 2] = 0;
+                    pixel_buffer[pixelIndex + 3] = 255;
+                }
+            }
         }
-        
     }
 
 }
 
 bool Game::Down(int currentCell) {
 
-    int downCell = currentCell + gridRows;
+    int downCell = currentCell + gridCols;
     // Boundary check
     if (downCell >= 0 && downCell < grid.size()) {
 
         // Check if space is available
-        if (this->grid[downCell] != 1) {
-            this->grid[downCell] = 1;
+        if ((this->grid[downCell] & 1) == 0) {
+            // Switch positions
+            this->grid[downCell] = this->grid[currentCell];
+            this->grid[currentCell] = 0;
+
             // Mark as visited
             this->grid[downCell] |= (1 << 7);
+            
             return true;
         }
         return false;      
@@ -188,17 +237,19 @@ bool Game::Down(int currentCell) {
 
 bool Game::DownLeft(int currentCell) {
 
-    int leftCell =  currentCell + gridRows - 1;
+    int leftCell =  currentCell + gridCols- 1;
     
-    int currentCellRow = (int) currentCell/gridRows;
-    int leftCellRow = (int) leftCell/gridRows;
+    int currentCellRow = (int) currentCell/gridCols;
+    int leftCellRow = (int) leftCell/gridCols;
     // Boundary check
     if (leftCell >= 0 && leftCell < grid.size() &&
     leftCellRow > currentCellRow) { // If they are not on the same row
         
         // Check if space is available
-        if (this->grid[leftCell] != 1) {
-            this->grid[leftCell] = 1;
+        if ((this->grid[leftCell] & 1) == 0) {
+            // Switch positions
+            this->grid[leftCell] = this->grid[currentCell];
+            this->grid[currentCell] = 0;
             // Mark as visited
             this->grid[leftCell] |= (1 << 7);
 
@@ -212,18 +263,20 @@ bool Game::DownLeft(int currentCell) {
 
 bool Game::DownRight(int currentCell) {
 
-    int rightCell = currentCell + gridRows + 1;
+    int rightCell = currentCell + gridCols + 1;
 
-    int currentCellRow = (int) currentCell/gridRows;
-    int rightCellRow = (int) rightCell/gridRows;
+    int currentCellRow = (int) currentCell/gridCols;
+    int rightCellRow = (int) rightCell/gridCols;
 
     // Boundary check
     if(rightCell >= 0 && rightCell < grid.size() &&
     currentCellRow + 1 == rightCellRow) {
 
         // Check if space is available
-        if (this->grid[rightCell] != 1) {
-            this->grid[rightCell] = 1;
+        if ((this->grid[rightCell] & 1) == 0) {
+            
+            this->grid[rightCell] = this->grid[currentCell];
+            this->grid[currentCell] = 0;
             // Mark as visited
             this->grid[rightCell] |= (1 << 7);
 
