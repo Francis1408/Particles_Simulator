@@ -95,54 +95,33 @@ void Game::ProcessInput(float dt)
 void Game::Render()
 {
    
-    // if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
-    //     // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
+    if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
+        // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
-    //     int x = (int) this->MouseX;
-    //     int y = (int) this->MouseY;
+        int x = (int) this->MouseX;
+        int y = (int) this->MouseY;
 
-    //     // Check if it is not out of bounds
-    //     if (x >=  0 && x < Width && y >= 0 && y < Height) {
+        // Check if it is not out of bounds
+        if (x >=  0 && x < Width && y >= 0 && y < Height) {
  
-    //         // Re-scale for the grid cell
-    //         int cellX = x / pixel_size;
-    //         int cellY = y / pixel_size;
+            // Re-scale for the grid cell
+            int cellX = x / pixel_size;
+            int cellY = y / pixel_size;
 
-    //         // Check if it is not out of bounds
-    //         if (cellX >= 0 && cellX < gridCols &&
-    //             cellY >= 0 && cellY < gridRows) {
+            // Check if it is not out of bounds
+            if (cellX >= 0 && cellX < gridCols &&
+                cellY >= 0 && cellY < gridRows) {
    
-    //             // Exact cell (cube) which the mouse is on
-    //             int cellIndex = cellY * gridCols + cellX;
-    //             this->grid[cellIndex] = 1;
+                // Exact cell (cube) which the mouse is on
+                int cellIndex = cellY * gridCols + cellX;
+                this->grid[cellIndex] = 1;
 
-    //             // Get the top-left pixel_buffer coordinate
-    //             int startX = cellX * pixel_size;
-    //             int startY = cellY * pixel_size;
-                
-    //             for (int dy = 0; dy < pixel_size; dy++) {
-    //                 for (int dx = 0; dx < pixel_size; dx++) {
-
-    //                     int px = startX + dx;
-    //                     int py = startY + dy;
-                        
-    //                     // Fills the pixels that belong to the grid
-    //                     // Horizontally(right) to vertically(down)
-    //                     int pixelIndex = (py * Width + px) * 4;
-
-    //                     pixel_buffer[pixelIndex + 0] = 255;
-    //                     pixel_buffer[pixelIndex + 1] = 255;
-    //                     pixel_buffer[pixelIndex + 2] = 255;
-    //                     pixel_buffer[pixelIndex + 3] = 255;
-    //                 }
-    //             }
-    //         }
-    //     }
+            }
+        }
         
     
-    // }
+    }
 
-    this->grid[30] = 1;
 
     this->Simulator();
     
@@ -199,7 +178,7 @@ void Game::Simulator() {
                 if (grid[i] & 1) {
                     pixel_buffer[pixelIndex + 0] = 255;
                     pixel_buffer[pixelIndex + 1] = 255;
-                    pixel_buffer[pixelIndex + 2] = 255;
+                    pixel_buffer[pixelIndex + 2] = 0;
                     pixel_buffer[pixelIndex + 3] = 255;
                 } else {
                     pixel_buffer[pixelIndex + 0] = 0;
