@@ -57,6 +57,12 @@ $(BUILD_DIR)/%.o: %.c
 run: $(OUT)
 	./$(OUT) $(ARGS)
 
+# Run with GPU
+run-gpu: $(OUT)
+	__NV_PRIME_RENDER_OFFLOAD=1 \
+	__GLX_VENDOR_LIBRARY_NAME=nvidia \
+	./$(OUT) $(ARGS)
+
 # Clean target
 clean:
 	rm -rf $(BUILD_DIR) $(OUT)

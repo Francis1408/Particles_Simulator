@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
 
     // Cretes the window
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Particles Simulator", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Particles simulator", nullptr, nullptr);
     glfwMakeContextCurrent(window);
 
     // glad: load all OpenGL function pointers
@@ -161,10 +161,11 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
 
     // Save the cursor coordinate everyime the left key is pressed
    
+
     Engine.MouseX = xpos;
     Engine.MouseY = ypos;
 
-    // std::cout << "Cursor Position at X:" << Engine.MouseX << " Y: " << Engine.MouseY << std::endl;
+        // std::cout << "Cursor Position at X:" << Engine.MouseX << " Y: " << Engine.MouseY << std::endl;
     
 }
 

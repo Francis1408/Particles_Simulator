@@ -43,14 +43,18 @@ void Game::Init(int argc, char* argv[])
     // SIMULATOR PRE-PROCESSING CONFIGS
     // ResourceManager::LoadShader("Shaders/basicShader.vs", "Shaders/basicShader.fs", nullptr, "cube");
     ResourceManager::LoadShader("Shaders/shaderCoordinate.vs", "Shaders/shaderFloor.fs", nullptr, "grid");
-    
+    ResourceManager::LoadShader("Shaders/shaderText.vs", "Shaders/shaderText.fs", nullptr, "text");
 
     // Define the View Matrix - Game is oriented from top to bottom
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
+    // The text Coordinate is defined from bottom to top
+    glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(this->Width), 0.0f, static_cast<float>(this->Height));
 
     // ResourceManager::GetShader("cube").Use().SetMat4("projection", projection);
     ResourceManager::GetShader("grid").Use().SetInt("image", 0);
     ResourceManager::GetShader("grid").SetMat4("projection", projection);
+    ResourceManager::GetShader("text").Use().SetMat4("text", 0);
+    ResourceManager::GetShader("text").SetMat4("projection", textProjection);
 
     // Shader Shader = ResourceManager::GetShader("cube");
     // CubeRenderer = new SpriteRenderer(Shader);
@@ -66,10 +70,10 @@ void Game::Init(int argc, char* argv[])
     // Declaring grid texture
     gridTexture = new Texture2D(GL_RGBA, GL_RGBA, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
-
+    // Resize grid based on the pixel size
     this->grid.resize(gridCols * gridRows, 0);
-    this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
 
+    this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
     std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0);
     // Make alpha visible
     for (int i = 0; i < Width * Height; i++)
