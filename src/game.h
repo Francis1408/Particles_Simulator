@@ -13,6 +13,13 @@ enum GameState {
     GAME_WIN
 };
 
+enum ElementType : u_int8_t {
+    EMPTY,
+    SAND,
+    WATER,
+};
+
+
 class Game {
 
     public:
@@ -41,8 +48,14 @@ class Game {
     int gridRows;
 
     // Game Grids
-    std::vector<uint8_t> grid;
+    std::vector<ElementType> grid;
     std::vector<uint8_t> pixel_buffer;
+
+    // Element Flags
+    ElementType currentElement;
+    std::vector<bool> visited;
+
+    // 
 
     // Initialize game state (load all shaders/textures/levels)
     void Init(int argc, char* argv[]);

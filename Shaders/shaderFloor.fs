@@ -4,13 +4,14 @@ out vec4 color;
 
 uniform sampler2D image;
 
-uniform vec3 spriteColor;
+uniform vec4 palette[256];
 
 
 
 void main()
 {    
 
+    uint id = uint(texture(image, TexCoords).r * 255.0);
     // GL_REPEAT willt tile the texture, so dont need to fract()
-    color = vec4(spriteColor, 1.0) * texture(image, TexCoords);
+    color = palette[id];
 }  

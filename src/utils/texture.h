@@ -38,7 +38,6 @@ public:
               unsigned int wrap_t, unsigned int filter_min, unsigned int filter_max);
 
     // generates texture from image data
-    void Generate(unsigned int width, unsigned int height, uint32_t* data);
     void Generate(unsigned int width, unsigned int height, unsigned char* data);
     // binds the texture as the current active GL_TEXTURE_2D texture object
     void Bind() const;

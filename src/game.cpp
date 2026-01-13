@@ -18,9 +18,6 @@ SpriteRenderer *GridRenderer;
 
 Texture2D *gridTexture;
 
-
-
-
 // Constructor
 Game::Game(unsigned int width, unsigned int height) 
     : State(GAME_ACTIVE), Keys(), Width(width), Height(height)
@@ -49,7 +46,7 @@ void Game::Init(int argc, char* argv[])
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
     // The text Coordinate is defined from bottom to top
     glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(this->Width), 0.0f, static_cast<float>(this->Height));
-
+    
     // ResourceManager::GetShader("cube").Use().SetMat4("projection", projection);
     ResourceManager::GetShader("grid").Use().SetInt("image", 0);
     ResourceManager::GetShader("grid").SetMat4("projection", projection);
@@ -68,10 +65,12 @@ void Game::Init(int argc, char* argv[])
     gridRows =  Height/pixel_size;
 
     // Declaring grid texture
-    gridTexture = new Texture2D(GL_RGBA, GL_RGBA, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
+    gridTexture = new Texture2D(GL_R8, GL_RED, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
 
     // Resize grid based on the pixel size
-    this->grid.resize(gridCols * gridRows, 0);
+    this->grid.resize(gridCols * gridRows, EMPTY);
+    // Resize flags
+    this->visited.resize(gridCols * gridRows, false);
 
     this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
     std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0);
@@ -81,8 +80,19 @@ void Game::Init(int argc, char* argv[])
         pixel_buffer[i * 4 + 3] = 255; // Alpha
     }
 
-    gridTexture->Generate(Width, Height, this->pixel_buffer.data());
+    gridTexture->Generate(gridCols, gridRows, nullptr);
 
+
+    // Starts with no element selected
+    this->currentElement = EMPTY;
+
+
+    glm::vec4 palette[256];
+    palette[EMPTY] = {0,0,0,1};
+    palette[SAND]  = {1,1,0,1};
+    palette[WATER] = {0,0,1,1};
+
+    ResourceManager::GetShader("grid").SetVec4("pallete", palette, 256);
 
 }
 
@@ -97,7 +107,8 @@ void Game::ProcessInput(float dt)
 }
 
 void Game::Render()
-{
+{   
+    
    
     if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
         // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
@@ -118,14 +129,24 @@ void Game::Render()
    
                 // Exact cell (cube) which the mouse is on
                 int cellIndex = cellY * gridCols + cellX;
-                this->grid[cellIndex] = 1;
+                this->grid[cellIndex] = this->currentElement;
 
             }
         }
+
+        if (this->Keys[GLFW_KEY_1]) {
+            this->currentElement = SAND;
+            std::cout << "SAND SELECTED" << std::endl;
+        }
+
+          if (this->Keys[GLFW_KEY_2]) {
+            this->currentElement = WATER;
+            std::cout << "WATER SELECTED" << std::endl;
+        }
+
         
     
     }
-
 
     this->Simulator();
     
@@ -143,10 +164,9 @@ void Game::Simulator() {
 
             int i = y * gridCols + x;
             
-            // Checks if the action was not applied to the cell
-            bool visited = ((this->grid[i] >> 7) & 1);
+            // Checks if the action was not applied to the cells
         
-            if (!visited) {
+            if (!this->visited[i]) {
         
                 if(!this->Down(i))
                     if(!this->DownLeft(i))
@@ -157,8 +177,8 @@ void Game::Simulator() {
     }
 
     // Clear visited cells
-    for (auto& cell : grid) {
-        cell &= 0x7F; // clear MSB
+     for (int i = 0; i < this->visited.size(); i++) {
+        this->visited[i] = false;
     }
 
 
@@ -179,11 +199,19 @@ void Game::Simulator() {
 
                 int pixelIndex = (py * Width + px) * 4;
 
-                if (grid[i] & 1) {
+                if (grid[i] == SAND) {
                     pixel_buffer[pixelIndex + 0] = 255;
                     pixel_buffer[pixelIndex + 1] = 255;
                     pixel_buffer[pixelIndex + 2] = 0;
                     pixel_buffer[pixelIndex + 3] = 255;
+                }
+                
+                else if (grid[i] == WATER) {
+                    pixel_buffer[pixelIndex + 0] = 0;
+                    pixel_buffer[pixelIndex + 1] = 0;
+                    pixel_buffer[pixelIndex + 2] = 255;
+                    pixel_buffer[pixelIndex + 3] = 255;
+
                 } else {
                     pixel_buffer[pixelIndex + 0] = 0;
                     pixel_buffer[pixelIndex + 1] = 0;
@@ -203,13 +231,14 @@ bool Game::Down(int currentCell) {
     if (downCell >= 0 && downCell < grid.size()) {
 
         // Check if space is available
-        if ((this->grid[downCell] & 1) == 0) {
+        if (grid[downCell] == EMPTY) {
             // Switch positions
+            ElementType aux = this->grid[downCell];
             this->grid[downCell] = this->grid[currentCell];
-            this->grid[currentCell] = 0;
+            this->grid[currentCell] = aux;
 
             // Mark as visited
-            this->grid[downCell] |= (1 << 7);
+            this->visited[downCell] = true;
             
             return true;
         }
@@ -229,12 +258,14 @@ bool Game::DownLeft(int currentCell) {
     leftCellRow > currentCellRow) { // If they are not on the same row
         
         // Check if space is available
-        if ((this->grid[leftCell] & 1) == 0) {
+        if (grid[leftCell] == EMPTY) {
             // Switch positions
+            ElementType aux = this->grid[leftCell]; 
             this->grid[leftCell] = this->grid[currentCell];
-            this->grid[currentCell] = 0;
+            this->grid[currentCell] = aux;
+
             // Mark as visited
-            this->grid[leftCell] |= (1 << 7);
+            this->visited[leftCell] = true;
 
             return true;    
         }
@@ -256,12 +287,14 @@ bool Game::DownRight(int currentCell) {
     currentCellRow + 1 == rightCellRow) {
 
         // Check if space is available
-        if ((this->grid[rightCell] & 1) == 0) {
-            
+        if (grid[rightCell] == EMPTY) {
+            // Switch poisitons
+            ElementType aux = this->grid[rightCell]; 
             this->grid[rightCell] = this->grid[currentCell];
-            this->grid[currentCell] = 0;
+            this->grid[currentCell] = aux;
+
             // Mark as visited
-            this->grid[rightCell] |= (1 << 7);
+            this->visited[rightCell] = true;
 
             return true;    
         }
