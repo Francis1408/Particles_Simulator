@@ -103,13 +103,7 @@ void Game::Update(float dt)
 
 void Game::ProcessInput(float dt)
 {
-    
-}
 
-void Game::Render()
-{   
-    
-   
     if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
         // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
@@ -130,23 +124,24 @@ void Game::Render()
                 // Exact cell (cube) which the mouse is on
                 int cellIndex = cellY * gridCols + cellX;
                 this->grid[cellIndex] = this->currentElement;
-
             }
-        }
-
-        if (this->Keys[GLFW_KEY_1]) {
-            this->currentElement = SAND;
-            std::cout << "SAND SELECTED" << std::endl;
-        }
-
-          if (this->Keys[GLFW_KEY_2]) {
-            this->currentElement = WATER;
-            std::cout << "WATER SELECTED" << std::endl;
-        }
-
-        
-    
+        }       
     }
+    
+    if (this->Keys[GLFW_KEY_1]) {
+        this->currentElement = SAND;
+        std::cout << "SAND SELECTED" << std::endl;
+    }
+
+        if (this->Keys[GLFW_KEY_2]) {
+        this->currentElement = WATER;
+        std::cout << "WATER SELECTED" << std::endl;
+    }
+}
+
+void Game::Render()
+{   
+    
 
     this->Simulator();
     
@@ -165,12 +160,21 @@ void Game::Simulator() {
             int i = y * gridCols + x;
             
             // Checks if the action was not applied to the cells
-        
             if (!this->visited[i]) {
+
+                switch (this->grid[i])
+                {
+                case SAND:
+                    this->Sand_behaviour(i);
+                    break;
+                
+                case WATER:
+                    this->Water_behaviour(i);
+                    break;
+                default:
+                    break;
+                }
         
-                if(!this->Down(i))
-                    if(!this->DownLeft(i))
-                         this->DownRight(i);
             }   
         }
     
@@ -181,46 +185,6 @@ void Game::Simulator() {
         this->visited[i] = false;
     }
 
-
-    // // Update pixelBuffer
-    // for (int i = 0; i < this->grid.size(); i++) {
-
-    //     int cellX = i % gridCols;
-    //     int cellY = i / gridCols;
-
-    //     int startX = cellX * pixel_size;
-    //     int startY = cellY * pixel_size;
-
-    //     for (int dy = 0; dy < pixel_size; dy++) {
-    //         for (int dx = 0; dx < pixel_size; dx++) {
-
-    //             int px = startX + dx;
-    //             int py = startY + dy;
-
-    //             int pixelIndex = (py * Width + px) * 4;
-
-    //             if (grid[i] == SAND) {
-    //                 pixel_buffer[pixelIndex + 0] = 255;
-    //                 pixel_buffer[pixelIndex + 1] = 255;
-    //                 pixel_buffer[pixelIndex + 2] = 0;
-    //                 pixel_buffer[pixelIndex + 3] = 255;
-    //             }
-                
-    //             else if (grid[i] == WATER) {
-    //                 pixel_buffer[pixelIndex + 0] = 0;
-    //                 pixel_buffer[pixelIndex + 1] = 0;
-    //                 pixel_buffer[pixelIndex + 2] = 255;
-    //                 pixel_buffer[pixelIndex + 3] = 255;
-
-    //             } else {
-    //                 pixel_buffer[pixelIndex + 0] = 0;
-    //                 pixel_buffer[pixelIndex + 1] = 0;
-    //                 pixel_buffer[pixelIndex + 2] = 0;
-    //                 pixel_buffer[pixelIndex + 3] = 255;
-    //             }
-    //         }
-    //     }
-    // }
 
 }
 
@@ -303,6 +267,86 @@ bool Game::DownRight(int currentCell) {
     }
 
     return false;
+}
+
+bool Game::Right(int currentCell) {
+
+    int rightCell = currentCell + 1;
+
+    int currentCellRow = (int) currentCell/gridCols;
+    int rightCellRow = (int) rightCell/gridCols;
+
+    // Boundary check
+    if(rightCell >= 0 && rightCell < grid.size() &&
+    currentCellRow == rightCellRow) {
+
+        // Check if space is available
+        if (grid[rightCell] == EMPTY) {
+            // Switch poisitons
+            uint8_t aux = this->grid[rightCell]; 
+            this->grid[rightCell] = this->grid[currentCell];
+            this->grid[currentCell] = aux;
+
+            // Mark as visited
+            this->visited[rightCell] = true;
+
+            return true;    
+        }
+        return false;
+    }
+
+    return false;
+}
+
+bool Game::Left(int currentCell) {
+
+    int leftCell =  currentCell - 1;
+    
+    int currentCellRow = (int) currentCell/gridCols;
+    int leftCellRow = (int) leftCell/gridCols;
+    // Boundary check
+    if (leftCell >= 0 && leftCell < grid.size() &&
+    leftCellRow == currentCellRow) { // If they are not on the same row
+        
+        // Check if space is available
+        if (grid[leftCell] == EMPTY) {
+            // Switch positions
+            uint8_t aux = this->grid[leftCell]; 
+            this->grid[leftCell] = this->grid[currentCell];
+            this->grid[currentCell] = aux;
+
+            // Mark as visited
+            this->visited[leftCell] = true;
+
+            return true;    
+        }
+        return false;
+    }
+
+    return false;
+
+}
+
+
+
+// ============= BEHAVIOURS =====================
+
+void Game::Sand_behaviour(int currentCell) {
+
+    if(!this->Down(currentCell))
+        if(!this->DownLeft(currentCell))
+            this->DownRight(currentCell);
+
+}
+
+void Game::Water_behaviour(int currentCell) {
+
+    if(!this->Down(currentCell))
+        if(!this->DownLeft(currentCell))
+            if(!this->DownRight(currentCell))
+                if(!this->Left(currentCell))
+                    this->Right(currentCell);
+
 }
 
 

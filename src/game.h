@@ -65,10 +65,17 @@ class Game {
     void Update(float dt);
     void Render();
     void Simulator();
+
+    // Elements behaviours
+    void Sand_behaviour(int currentCell);
+    void Water_behaviour(int currentCell);
+
+    // Movements
     bool Down(int currentCell);
     bool DownLeft(int currentCell);
     bool DownRight(int currentCell);
-
+    bool Left(int currentCell);
+    bool Right(int currentCell);
 };
 
 #endif

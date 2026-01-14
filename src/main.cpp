@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         
         // // manage user input
         // // -----------------
-        // Engine.ProcessInput(deltaTime);
+        Engine.ProcessInput(deltaTime);
         
         // // update game state
         // // -----------------
