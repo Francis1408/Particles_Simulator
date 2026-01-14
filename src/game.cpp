@@ -87,12 +87,12 @@ void Game::Init(int argc, char* argv[])
     this->currentElement = EMPTY;
 
 
-    glm::vec4 palette[256];
-    palette[EMPTY] = {0,0,0,1};
-    palette[SAND]  = {1,1,0,1};
-    palette[WATER] = {0,0,1,1};
+    glm::vec4 palette[256] = {};
+    palette[EMPTY] = glm::vec4{0,0,0,1};
+    palette[SAND]  = glm::vec4{1,1,0,1};
+    palette[WATER] = glm::vec4{0,0,1,1};
 
-    ResourceManager::GetShader("grid").SetVec4("pallete", palette, 256);
+    ResourceManager::GetShader("grid").Use().SetVec4("palette", palette, 256);
 
 }
 
@@ -150,8 +150,8 @@ void Game::Render()
 
     this->Simulator();
     
-    gridTexture->Update(this->pixel_buffer.data()); 
-    GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(Width, Height));
+    gridTexture->Update(this->grid.data()); 
+    GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(gridCols * pixel_size, gridRows * pixel_size));
 
 }
 
@@ -182,45 +182,45 @@ void Game::Simulator() {
     }
 
 
-    // Update pixelBuffer
-    for (int i = 0; i < this->grid.size(); i++) {
+    // // Update pixelBuffer
+    // for (int i = 0; i < this->grid.size(); i++) {
 
-        int cellX = i % gridCols;
-        int cellY = i / gridCols;
+    //     int cellX = i % gridCols;
+    //     int cellY = i / gridCols;
 
-        int startX = cellX * pixel_size;
-        int startY = cellY * pixel_size;
+    //     int startX = cellX * pixel_size;
+    //     int startY = cellY * pixel_size;
 
-        for (int dy = 0; dy < pixel_size; dy++) {
-            for (int dx = 0; dx < pixel_size; dx++) {
+    //     for (int dy = 0; dy < pixel_size; dy++) {
+    //         for (int dx = 0; dx < pixel_size; dx++) {
 
-                int px = startX + dx;
-                int py = startY + dy;
+    //             int px = startX + dx;
+    //             int py = startY + dy;
 
-                int pixelIndex = (py * Width + px) * 4;
+    //             int pixelIndex = (py * Width + px) * 4;
 
-                if (grid[i] == SAND) {
-                    pixel_buffer[pixelIndex + 0] = 255;
-                    pixel_buffer[pixelIndex + 1] = 255;
-                    pixel_buffer[pixelIndex + 2] = 0;
-                    pixel_buffer[pixelIndex + 3] = 255;
-                }
+    //             if (grid[i] == SAND) {
+    //                 pixel_buffer[pixelIndex + 0] = 255;
+    //                 pixel_buffer[pixelIndex + 1] = 255;
+    //                 pixel_buffer[pixelIndex + 2] = 0;
+    //                 pixel_buffer[pixelIndex + 3] = 255;
+    //             }
                 
-                else if (grid[i] == WATER) {
-                    pixel_buffer[pixelIndex + 0] = 0;
-                    pixel_buffer[pixelIndex + 1] = 0;
-                    pixel_buffer[pixelIndex + 2] = 255;
-                    pixel_buffer[pixelIndex + 3] = 255;
+    //             else if (grid[i] == WATER) {
+    //                 pixel_buffer[pixelIndex + 0] = 0;
+    //                 pixel_buffer[pixelIndex + 1] = 0;
+    //                 pixel_buffer[pixelIndex + 2] = 255;
+    //                 pixel_buffer[pixelIndex + 3] = 255;
 
-                } else {
-                    pixel_buffer[pixelIndex + 0] = 0;
-                    pixel_buffer[pixelIndex + 1] = 0;
-                    pixel_buffer[pixelIndex + 2] = 0;
-                    pixel_buffer[pixelIndex + 3] = 255;
-                }
-            }
-        }
-    }
+    //             } else {
+    //                 pixel_buffer[pixelIndex + 0] = 0;
+    //                 pixel_buffer[pixelIndex + 1] = 0;
+    //                 pixel_buffer[pixelIndex + 2] = 0;
+    //                 pixel_buffer[pixelIndex + 3] = 255;
+    //             }
+    //         }
+    //     }
+    // }
 
 }
 
@@ -233,7 +233,7 @@ bool Game::Down(int currentCell) {
         // Check if space is available
         if (grid[downCell] == EMPTY) {
             // Switch positions
-            ElementType aux = this->grid[downCell];
+            uint8_t aux = this->grid[downCell];
             this->grid[downCell] = this->grid[currentCell];
             this->grid[currentCell] = aux;
 
@@ -260,7 +260,7 @@ bool Game::DownLeft(int currentCell) {
         // Check if space is available
         if (grid[leftCell] == EMPTY) {
             // Switch positions
-            ElementType aux = this->grid[leftCell]; 
+            uint8_t aux = this->grid[leftCell]; 
             this->grid[leftCell] = this->grid[currentCell];
             this->grid[currentCell] = aux;
 
@@ -289,7 +289,7 @@ bool Game::DownRight(int currentCell) {
         // Check if space is available
         if (grid[rightCell] == EMPTY) {
             // Switch poisitons
-            ElementType aux = this->grid[rightCell]; 
+            uint8_t aux = this->grid[rightCell]; 
             this->grid[rightCell] = this->grid[currentCell];
             this->grid[currentCell] = aux;
 

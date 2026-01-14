@@ -4,6 +4,7 @@
 
 #include "../../glad/glad.h"
 #include "../../glm/glm.hpp"
+#include "../../glm/gtc/type_ptr.hpp"
 
 #include <string>
 #include <fstream>
@@ -39,7 +40,7 @@ public:
     void SetVec3(const std::string &name, const glm::vec3 &value, bool useShader = false);
     void SetVec3(const std::string &name, float x, float y, float z, bool useShader = false);
     // ------------------------------------------------------------------------
-    void SetVec4(const std::string &name, const glm::vec4 &value, bool useShader = false);
+    void SetVec4(const std::string &name, const glm::vec4 *value, int count = 1, bool useShader = false);
     void SetVec4(const std::string &name, float x, float y, float z, float w, bool useShader = false);
     // ------------------------------------------------------------------------
     void SetMat2(const std::string &name, const glm::mat2 &mat, bool useShader = false);

@@ -104,11 +104,11 @@ void Shader::SetVec3(const std::string &name, float x, float y, float z, bool us
     glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z); 
 }
 // ------------------------------------------------------------------------
-void Shader::SetVec4(const std::string &name, const glm::vec4 &value, bool useShader) 
+void Shader::SetVec4(const std::string &name, const glm::vec4 *value, int count, bool useShader) 
 { 
     if (useShader)
         this->Use();
-    glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]); 
+    glUniform4fv(glGetUniformLocation(ID, name.c_str()), count, glm::value_ptr(value[0])); 
 }
 void Shader::SetVec4(const std::string &name, float x, float y, float z, float w, bool useShader) 
 { 
@@ -116,6 +116,7 @@ void Shader::SetVec4(const std::string &name, float x, float y, float z, float w
         this->Use();
     glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w); 
 }
+
 // ------------------------------------------------------------------------
 void Shader::SetMat2(const std::string &name, const glm::mat2 &mat, bool useShader) 
 {

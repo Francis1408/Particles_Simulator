@@ -48,11 +48,11 @@ class Game {
     int gridRows;
 
     // Game Grids
-    std::vector<ElementType> grid;
+    std::vector<uint8_t> grid;
     std::vector<uint8_t> pixel_buffer;
 
     // Element Flags
-    ElementType currentElement;
+    u_int8_t currentElement;
     std::vector<bool> visited;
 
     // 
