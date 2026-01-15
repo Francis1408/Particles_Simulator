@@ -106,9 +106,16 @@ void Game::Init(int argc, char* argv[])
 
 }
 
-void Game::Update(float dt)
-{
-    
+void Game::StepSimulation(float dt) {
+
+    accumulator += dt * simulationSpeed;
+
+    // When it reaches the cap time
+    while (accumulator >= simulationStep) {
+
+        Simulator(); // Updates the grid once
+        accumulator -= simulationStep;
+    }
 }
 
 void Game::ProcessInput(float dt)
@@ -150,15 +157,24 @@ void Game::ProcessInput(float dt)
 
     if (this->Keys[GLFW_KEY_3]) {
     this->currentElement = WALL;
-    std::cout << "WALLSELECTED" << std::endl;
+    std::cout << "WALL SELECTED" << std::endl;
+    }
+
+    if (Keys[GLFW_KEY_UP]) {
+        simulationSpeed *= 1.02f;
+        simulationSpeed = glm::clamp(simulationSpeed, 0.0f, 10.0f);
+        std::cout << "AUMENTOU" << std::endl;
+    }
+
+    if (Keys[GLFW_KEY_DOWN]) {
+        simulationSpeed *= 0.98f;
+        simulationSpeed = glm::clamp(simulationSpeed, 0.0f, 10.0f);
+        std::cout << "DIMINUIU" << std::endl;  
     }
 }
 
 void Game::Render()
 {   
-    
-
-    this->Simulator();
     
     gridTexture->Update(this->grid.data()); 
     GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(gridCols * pixel_size, gridRows * pixel_size));
@@ -355,6 +371,14 @@ bool Game::Left(int currentCell) {
     return false;
 
 }
+
+
+
+// bool Game::CheckAvailability(int origin, int dest) {
+
+
+// }
+
 
 
 

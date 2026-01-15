@@ -7,6 +7,7 @@
 #include "utils/textRenderer.h"
 
 #include <iostream>
+#include <string>
 
 // GLFW function declarations
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -24,7 +25,7 @@ const unsigned int SCREEN_WIDTH = 1024;
 // The height of the screen
 const unsigned int SCREEN_HEIGHT = 512;
 // Time to update the FPS value
-const float ELAPSED_TIME = 0.5f;
+const float ELAPSED_TIME = 1.5f;
 
 
 Game Engine(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -103,11 +104,8 @@ int main(int argc, char *argv[])
         // // manage user input
         // // -----------------
         Engine.ProcessInput(deltaTime);
-        
-        // // update game state
-        // // -----------------
-        //  Engine.Update(deltaTime);
-        
+        Engine.StepSimulation(deltaTime);
+         
         // render
         // ------
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -194,8 +192,11 @@ void showFPS(float& fpsLastTime, unsigned int& fpsFrameCount) {
         fpsLastTime = currentTime;
     }
     // Show the FPS time on screen
-    textRenderer->DrawText("FPS: " + std::to_string(static_cast<int>(FPS)),
+    textRenderer->DrawText("REAL FPS: " + std::to_string(static_cast<int>(FPS)),
         0.0f, 480.0f, 0.5f, glm::vec3(1.0, 0.0f, 0.0f));
+
+    textRenderer->DrawText("SPEED: " + std::to_string(Engine.simulationSpeed) + "X",
+        0.0f, 450.0f, 0.5f, glm::vec3(1.0, 0.0f, 0.0f));
 
 }
 

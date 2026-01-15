@@ -30,6 +30,12 @@ struct ElementProperties {
 class Game {
 
     public:
+
+    // Simulation timing
+    float simulationStep = 1.0f / 30.0f;
+    float simulationSpeed = 1.0f;
+    float accumulator = 0.0f;
+
     // game state
     GameState State;
     bool Keys[1024]; // Array of keys
@@ -68,6 +74,7 @@ class Game {
     // Game Loop
     void ProcessInput(float dt);
     void Update(float dt);
+    void StepSimulation(float dt);
     void Render();
     void Simulator();
     
@@ -82,6 +89,10 @@ class Game {
     bool DownRight(int currentCell);
     bool Left(int currentCell);
     bool Right(int currentCell);
+
+
+    // CellCheck
+    bool CheckAvailability(int originCell, int destCell);
 };
 
 #endif
