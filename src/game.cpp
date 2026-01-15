@@ -91,6 +91,16 @@ void Game::Init(int argc, char* argv[])
     palette[EMPTY] = glm::vec4{0,0,0,1};
     palette[SAND]  = glm::vec4{1,1,0,1};
     palette[WATER] = glm::vec4{0,0,1,1};
+    palette[WALL] = glm::vec4{0.5,0.5,0.5,1};
+
+
+    // PHYSICAL PROPERTIES
+    physicalProp[EMPTY] = {0.0f, false};
+    physicalProp[SAND] = {2.0f, true};
+    physicalProp[WATER] = {1.0f, false};
+    physicalProp[WALL] = {100.0f, true};
+
+
 
     ResourceManager::GetShader("grid").Use().SetVec4("palette", palette, 256);
 
@@ -133,9 +143,14 @@ void Game::ProcessInput(float dt)
         std::cout << "SAND SELECTED" << std::endl;
     }
 
-        if (this->Keys[GLFW_KEY_2]) {
-        this->currentElement = WATER;
-        std::cout << "WATER SELECTED" << std::endl;
+    if (this->Keys[GLFW_KEY_2]) {
+    this->currentElement = WATER;
+    std::cout << "WATER SELECTED" << std::endl;
+    }
+
+    if (this->Keys[GLFW_KEY_3]) {
+    this->currentElement = WALL;
+    std::cout << "WALLSELECTED" << std::endl;
     }
 }
 
@@ -177,9 +192,7 @@ void Game::Simulator() {
         
             }   
         }
-    
     }
-
     // Clear visited cells
      for (int i = 0; i < this->visited.size(); i++) {
         this->visited[i] = false;
@@ -194,17 +207,22 @@ bool Game::Down(int currentCell) {
     // Boundary check
     if (downCell >= 0 && downCell < grid.size()) {
 
-        // Check if space is available
-        if (grid[downCell] == EMPTY) {
-            // Switch positions
-            uint8_t aux = this->grid[downCell];
-            this->grid[downCell] = this->grid[currentCell];
-            this->grid[currentCell] = aux;
+        // Check if grid is not solid
+        if (!physicalProp[grid[downCell]].isSolid) {
 
-            // Mark as visited
-            this->visited[downCell] = true;
-            
-            return true;
+            // Check density
+            if(physicalProp[grid[downCell]].density < physicalProp[grid[currentCell]].density) {
+                
+                // Switch positions
+                uint8_t aux = grid[downCell];
+                grid[downCell] = grid[currentCell];
+                grid[currentCell] = aux;
+                // Mark as visited
+                visited[downCell] = true;
+                visited[currentCell] = true;
+                
+                return true;
+            }
         }
         return false;      
     }
@@ -222,20 +240,22 @@ bool Game::DownLeft(int currentCell) {
     leftCellRow > currentCellRow) { // If they are not on the same row
         
         // Check if space is available
-        if (grid[leftCell] == EMPTY) {
-            // Switch positions
-            uint8_t aux = this->grid[leftCell]; 
-            this->grid[leftCell] = this->grid[currentCell];
-            this->grid[currentCell] = aux;
-
-            // Mark as visited
-            this->visited[leftCell] = true;
-
-            return true;    
+        if (!physicalProp[grid[leftCell]].isSolid) {
+            // Check density
+            if(physicalProp[grid[leftCell]].density < physicalProp[grid[currentCell]].density) {
+                
+                // Switch positions
+                uint8_t aux = grid[leftCell];
+                grid[leftCell] = grid[currentCell];
+                grid[currentCell] = aux;
+                // Mark as visited
+                visited[leftCell] = true;
+                visited[currentCell] = true;
+                return true;
+            }   
         }
         return false;
     }
-
     return false;
 }
 
@@ -251,21 +271,22 @@ bool Game::DownRight(int currentCell) {
     currentCellRow + 1 == rightCellRow) {
 
         // Check if space is available
-        if (grid[rightCell] == EMPTY) {
-            // Switch poisitons
-            uint8_t aux = this->grid[rightCell]; 
-            this->grid[rightCell] = this->grid[currentCell];
-            this->grid[currentCell] = aux;
-
-            // Mark as visited
-            this->visited[rightCell] = true;
-
-            return true;    
+        if (!physicalProp[grid[rightCell]].isSolid) {
+            // Check density
+            if(physicalProp[grid[rightCell]].density < physicalProp[grid[currentCell]].density) {
+                
+                // Switch positions
+                uint8_t aux = this->grid[rightCell];
+                this->grid[rightCell] = this->grid[currentCell];
+                this->grid[currentCell] = aux;
+                // Mark as visited
+                visited[rightCell] = true;
+                
+                return true;
+            }   
         }
         return false;
-
     }
-
     return false;
 }
 
@@ -281,16 +302,20 @@ bool Game::Right(int currentCell) {
     currentCellRow == rightCellRow) {
 
         // Check if space is available
-        if (grid[rightCell] == EMPTY) {
-            // Switch poisitons
-            uint8_t aux = this->grid[rightCell]; 
-            this->grid[rightCell] = this->grid[currentCell];
-            this->grid[currentCell] = aux;
-
-            // Mark as visited
-            this->visited[rightCell] = true;
-
-            return true;    
+        if (!physicalProp[grid[rightCell]].isSolid) {
+            // Check density
+            if(physicalProp[grid[rightCell]].density < physicalProp[grid[currentCell]].density) {
+                
+                // Switch positions
+                uint8_t aux = grid[rightCell];
+                grid[rightCell] = grid[currentCell];
+                grid[currentCell] = aux;
+                // Mark as visited
+                visited[rightCell] = true;
+                visited[currentCell] = true;
+                
+                return true;
+            }   
         }
         return false;
     }
@@ -309,16 +334,20 @@ bool Game::Left(int currentCell) {
     leftCellRow == currentCellRow) { // If they are not on the same row
         
         // Check if space is available
-        if (grid[leftCell] == EMPTY) {
-            // Switch positions
-            uint8_t aux = this->grid[leftCell]; 
-            this->grid[leftCell] = this->grid[currentCell];
-            this->grid[currentCell] = aux;
-
-            // Mark as visited
-            this->visited[leftCell] = true;
-
-            return true;    
+        if (!physicalProp[grid[leftCell]].isSolid) {
+            // Check density
+            if(physicalProp[grid[leftCell]].density < physicalProp[grid[currentCell]].density) {
+                
+                // Switch positions
+                uint8_t aux = grid[leftCell];
+                grid[leftCell] = grid[currentCell];
+                grid[currentCell] = aux;
+                // Mark as visited
+                visited[leftCell] = true;
+                visited[currentCell] = true;
+                
+                return true;
+            }   
         }
         return false;
     }

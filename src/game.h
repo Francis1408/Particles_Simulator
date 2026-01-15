@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <array>
 
 enum GameState {
     GAME_ACTIVE,
@@ -17,6 +18,12 @@ enum ElementType : u_int8_t {
     EMPTY,
     SAND,
     WATER,
+    WALL,
+};
+
+struct ElementProperties {
+    float density;
+    bool isSolid;
 };
 
 
@@ -33,9 +40,6 @@ class Game {
 
     // FLAGS
     bool keyChartOn = false;
-
-    // ZBuffer
-    std::vector<float> ZBuffer;
 
     // Constructor
     Game(unsigned int width, unsigned int height);
@@ -55,7 +59,8 @@ class Game {
     u_int8_t currentElement;
     std::vector<bool> visited;
 
-    // 
+    // Physiscs
+    std::array<ElementProperties, 256> physicalProp;
 
     // Initialize game state (load all shaders/textures/levels)
     void Init(int argc, char* argv[]);
@@ -65,6 +70,7 @@ class Game {
     void Update(float dt);
     void Render();
     void Simulator();
+    
 
     // Elements behaviours
     void Sand_behaviour(int currentCell);
