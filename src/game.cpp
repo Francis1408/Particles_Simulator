@@ -1,6 +1,7 @@
 #include "game.h"
 #include "utils/resourceManager.h"
 #include "utils/spriteRenderer.h"
+#include "Elements/elements_behaviours.h"
 
 // GLM Mathematics Library headers
 #include "../glm/glm.hpp"
@@ -39,7 +40,7 @@ void Game::Init(int argc, char* argv[])
 {
     // SIMULATOR PRE-PROCESSING CONFIGS
     // ResourceManager::LoadShader("Shaders/basicShader.vs", "Shaders/basicShader.fs", nullptr, "cube");
-    ResourceManager::LoadShader("Shaders/shaderCoordinate.vs", "Shaders/shaderFloor.fs", nullptr, "grid");
+    ResourceManager::LoadShader("Shaders/quadShader.vs", "Shaders/quadShader.fs", nullptr, "grid");
     ResourceManager::LoadShader("Shaders/shaderText.vs", "Shaders/shaderText.fs", nullptr, "text");
 
     // Define the View Matrix - Game is oriented from top to bottom
@@ -59,7 +60,7 @@ void Game::Init(int argc, char* argv[])
     Shader Shader = ResourceManager::GetShader("grid");
     GridRenderer = new SpriteRenderer(Shader);
 
-    pixel_size = 8;
+    pixel_size = 4;
 
     gridCols = Width/pixel_size;
     gridRows =  Height/pixel_size;
@@ -87,18 +88,40 @@ void Game::Init(int argc, char* argv[])
     this->currentElement = EMPTY;
 
 
+    // Define the elements properties
+
+    elements[EMPTY] = {
+    .density = 0.0f,
+    .solid = false,
+    .update = nullptr
+    };
+
+    elements[SAND] = {
+        .density = 2.0f,
+        .solid = true,
+        .update = SandUpdate
+    };
+
+    elements[WATER] = {
+        .density = 1.0f,
+        .solid = false,
+        .update = WaterUpdate
+    };
+
+    elements[WALL] = {
+        .density = 100.0f,
+        .solid = true,
+        .update = nullptr
+    };
+
+
+
+
     glm::vec4 palette[256] = {};
     palette[EMPTY] = glm::vec4{0,0,0,1};
     palette[SAND]  = glm::vec4{1,1,0,1};
     palette[WATER] = glm::vec4{0,0,1,1};
     palette[WALL] = glm::vec4{0.5,0.5,0.5,1};
-
-
-    // PHYSICAL PROPERTIES
-    physicalProp[EMPTY] = {0.0f, false};
-    physicalProp[SAND] = {2.0f, true};
-    physicalProp[WATER] = {1.0f, false};
-    physicalProp[WALL] = {100.0f, true};
 
 
 
@@ -192,20 +215,14 @@ void Game::Simulator() {
             
             // Checks if the action was not applied to the cells
             if (!this->visited[i]) {
-
-                switch (this->grid[i])
-                {
-                case SAND:
-                    this->Sand_behaviour(i);
-                    break;
                 
-                case WATER:
-                    this->Water_behaviour(i);
-                    break;
-                default:
-                    break;
+                uint8_t type = grid[i];
+                Element& e = elements[type];
+
+                if(e.update) {
+                    e.update(*this, i);
                 }
-        
+
             }   
         }
     }
@@ -224,21 +241,18 @@ bool Game::Down(int currentCell) {
     if (downCell >= 0 && downCell < grid.size()) {
 
         // Check if grid is not solid
-        if (!physicalProp[grid[downCell]].isSolid) {
-
-            // Check density
-            if(physicalProp[grid[downCell]].density < physicalProp[grid[currentCell]].density) {
+        if (grid[downCell] == EMPTY) {
                 
-                // Switch positions
-                uint8_t aux = grid[downCell];
-                grid[downCell] = grid[currentCell];
-                grid[currentCell] = aux;
-                // Mark as visited
-                visited[downCell] = true;
-                visited[currentCell] = true;
-                
-                return true;
-            }
+            // Switch positions
+            uint8_t aux = grid[downCell];
+            grid[downCell] = grid[currentCell];
+            grid[currentCell] = aux;
+            // Mark as visited
+            visited[downCell] = true;
+            visited[currentCell] = true;
+            
+            return true;
+            
         }
         return false;      
     }
@@ -256,19 +270,17 @@ bool Game::DownLeft(int currentCell) {
     leftCellRow > currentCellRow) { // If they are not on the same row
         
         // Check if space is available
-        if (!physicalProp[grid[leftCell]].isSolid) {
-            // Check density
-            if(physicalProp[grid[leftCell]].density < physicalProp[grid[currentCell]].density) {
-                
-                // Switch positions
-                uint8_t aux = grid[leftCell];
-                grid[leftCell] = grid[currentCell];
-                grid[currentCell] = aux;
-                // Mark as visited
-                visited[leftCell] = true;
-                visited[currentCell] = true;
-                return true;
-            }   
+        if (grid[leftCell] == EMPTY) {
+           
+            // Switch positions
+            uint8_t aux = grid[leftCell];
+            grid[leftCell] = grid[currentCell];
+            grid[currentCell] = aux;
+            // Mark as visited
+            visited[leftCell] = true;
+            visited[currentCell] = true;
+            return true;
+              
         }
         return false;
     }
@@ -287,20 +299,18 @@ bool Game::DownRight(int currentCell) {
     currentCellRow + 1 == rightCellRow) {
 
         // Check if space is available
-        if (!physicalProp[grid[rightCell]].isSolid) {
-            // Check density
-            if(physicalProp[grid[rightCell]].density < physicalProp[grid[currentCell]].density) {
-                
-                // Switch positions
-                uint8_t aux = this->grid[rightCell];
-                this->grid[rightCell] = this->grid[currentCell];
-                this->grid[currentCell] = aux;
-                // Mark as visited
-                visited[rightCell] = true;
-                
-                return true;
-            }   
-        }
+        if (grid[rightCell] == EMPTY) {
+
+            // Switch positions
+            uint8_t aux = this->grid[rightCell];
+            this->grid[rightCell] = this->grid[currentCell];
+            this->grid[currentCell] = aux;
+            // Mark as visited
+            visited[rightCell] = true;
+            
+            return true;
+            
+    }
         return false;
     }
     return false;
@@ -318,20 +328,18 @@ bool Game::Right(int currentCell) {
     currentCellRow == rightCellRow) {
 
         // Check if space is available
-        if (!physicalProp[grid[rightCell]].isSolid) {
-            // Check density
-            if(physicalProp[grid[rightCell]].density < physicalProp[grid[currentCell]].density) {
+        if (grid[rightCell] == EMPTY) {
                 
-                // Switch positions
-                uint8_t aux = grid[rightCell];
-                grid[rightCell] = grid[currentCell];
-                grid[currentCell] = aux;
-                // Mark as visited
-                visited[rightCell] = true;
-                visited[currentCell] = true;
-                
-                return true;
-            }   
+            // Switch positions
+            uint8_t aux = grid[rightCell];
+            grid[rightCell] = grid[currentCell];
+            grid[currentCell] = aux;
+            // Mark as visited
+            visited[rightCell] = true;
+            visited[currentCell] = true;
+            
+            return true;
+             
         }
         return false;
     }
@@ -350,20 +358,18 @@ bool Game::Left(int currentCell) {
     leftCellRow == currentCellRow) { // If they are not on the same row
         
         // Check if space is available
-        if (!physicalProp[grid[leftCell]].isSolid) {
-            // Check density
-            if(physicalProp[grid[leftCell]].density < physicalProp[grid[currentCell]].density) {
-                
-                // Switch positions
-                uint8_t aux = grid[leftCell];
-                grid[leftCell] = grid[currentCell];
-                grid[currentCell] = aux;
-                // Mark as visited
-                visited[leftCell] = true;
-                visited[currentCell] = true;
-                
-                return true;
-            }   
+        if (grid[leftCell] == EMPTY) {
+       
+            // Switch positions
+            uint8_t aux = grid[leftCell];
+            grid[leftCell] = grid[currentCell];
+            grid[currentCell] = aux;
+            // Mark as visited
+            visited[leftCell] = true;
+            visited[currentCell] = true;
+            
+            return true;
+        
         }
         return false;
     }
@@ -371,37 +377,3 @@ bool Game::Left(int currentCell) {
     return false;
 
 }
-
-
-
-// bool Game::CheckAvailability(int origin, int dest) {
-
-
-// }
-
-
-
-
-// ============= BEHAVIOURS =====================
-
-void Game::Sand_behaviour(int currentCell) {
-
-    if(!this->Down(currentCell))
-        if(!this->DownLeft(currentCell))
-            this->DownRight(currentCell);
-
-}
-
-void Game::Water_behaviour(int currentCell) {
-
-    if(!this->Down(currentCell))
-        if(!this->DownLeft(currentCell))
-            if(!this->DownRight(currentCell))
-                if(!this->Left(currentCell))
-                    this->Right(currentCell);
-
-}
-
-
-
-

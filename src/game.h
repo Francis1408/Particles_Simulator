@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+
+#include "Elements/element.h"
 #include "../glad/glad.h"
 #include <GLFW/glfw3.h>
 
@@ -21,18 +23,13 @@ enum ElementType : u_int8_t {
     WALL,
 };
 
-struct ElementProperties {
-    float density;
-    bool isSolid;
-};
-
 
 class Game {
 
     public:
 
     // Simulation timing
-    float simulationStep = 1.0f / 30.0f;
+    float simulationStep = 1.0f / 60.0f;
     float simulationSpeed = 1.0f;
     float accumulator = 0.0f;
 
@@ -66,7 +63,8 @@ class Game {
     std::vector<bool> visited;
 
     // Physiscs
-    std::array<ElementProperties, 256> physicalProp;
+    std::array<Element, 256> elements;
+    float gravity = 10.0f;
 
     // Initialize game state (load all shaders/textures/levels)
     void Init(int argc, char* argv[]);
@@ -79,9 +77,6 @@ class Game {
     void Simulator();
     
 
-    // Elements behaviours
-    void Sand_behaviour(int currentCell);
-    void Water_behaviour(int currentCell);
 
     // Movements
     bool Down(int currentCell);
@@ -91,8 +86,6 @@ class Game {
     bool Right(int currentCell);
 
 
-    // CellCheck
-    bool CheckAvailability(int originCell, int destCell);
 };
 
 #endif

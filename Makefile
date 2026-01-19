@@ -7,17 +7,20 @@ CFLAGS = -fdiagnostics-color=always -g
 # Directories
 SRC_DIR = src
 UTILS_DIR = src/utils
+ELEMENTS_DIR = src/Elements
 GLAD_DIR = glad
 BUILD_DIR = build
 
 # Source files
 CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp) \
-			$(wildcard $(UTILS_DIR)/*.cpp)
+			$(wildcard $(UTILS_DIR)/*.cpp) \
+			$(wildcard $(ELEMENTS_DIR)/*.cpp)
+
 GLAD_FILES = $(wildcard $(GLAD_DIR)/*.c)
 
 
 # Tell make where to find source files
-vpath %.cpp $(SRC_DIR) $(UTILS_DIR)
+vpath %.cpp $(SRC_DIR) $(UTILS_DIR) $(ELEMENTS_DIR)
 vpath %.c   $(GLAD_DIR)
 
 # Object files (flattened into build/)
