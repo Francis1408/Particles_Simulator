@@ -55,6 +55,8 @@ class Game {
     int gridRows;
 
     int brushSize;
+    float brushOriginX;
+    float brushOriginY;
 
     // Game Grids
     std::vector<uint8_t> grid;
@@ -74,6 +76,7 @@ class Game {
     // Game Loop
     void ProcessInput(float dt);
     void Update(float dt);
+    void UpdateDrawingArea();
     void StepSimulation(float dt);
     void Render();
     void Simulator();

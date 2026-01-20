@@ -69,6 +69,8 @@ void Game::Init(int argc, char* argv[])
 
     pixel_size = 4;
     brushSize = 1;
+    brushOriginX = 0.0f;
+    brushOriginY = 0.0f;
 
     gridCols = Width/pixel_size;
     gridRows =  Height/pixel_size;
@@ -123,8 +125,6 @@ void Game::Init(int argc, char* argv[])
     };
 
 
-
-
     glm::vec4 palette[256] = {};
     palette[EMPTY] = glm::vec4{0,0,0,1};
     palette[SAND]  = glm::vec4{1,1,0,1};
@@ -155,25 +155,32 @@ void Game::ProcessInput(float dt)
     if (this->MouseKeys[GLFW_MOUSE_BUTTON_LEFT]) {
         // glm::vec2 drawCoord = glm::vec2(this->MouseX, this->MouseY);
 
-        int x = (int) this->MouseX;
-        int y = (int) this->MouseY;
+        int x = (int) this->brushOriginX;
+        int y = (int) this->brushOriginY;
 
-        // Check if it is not out of bounds
-        if (x >=  0 && x < Width && y >= 0 && y < Height) {
- 
-            // Re-scale for the grid cell
-            int cellX = x / pixel_size;
-            int cellY = y / pixel_size;
+        // Re-scale for the grid cell
 
-            // Check if it is not out of bounds
-            if (cellX >= 0 && cellX < gridCols &&
-                cellY >= 0 && cellY < gridRows) {
-   
-                // Exact cell (cube) which the mouse is on
-                int cellIndex = cellY * gridCols + cellX;
-                this->grid[cellIndex] = this->currentElement;
+        int startingCellX = x / pixel_size;
+        int startingCellY = y / pixel_size;
+
+        for(int i = 0; i < brushSize; i++) {
+            for(int j = 0; j < brushSize; j++) {
+
+                int cellX = startingCellX + j;
+                int cellY = startingCellY + i;
+
+                // Check if it is not out of bounds
+                if (cellX >= 0 && cellX < gridCols &&
+                    cellY >= 0 && cellY < gridRows) {
+        
+                    // Exact cell (cube) which the mouse is on
+                    int cellIndex = cellY * gridCols + cellX;
+                    this->grid[cellIndex] = this->currentElement;
+                }
+
             }
-        }       
+        }
+      
     }
     
     if (this->Keys[GLFW_KEY_1]) {
@@ -224,14 +231,18 @@ void Game::Render()
     
     gridTexture->Update(this->grid.data()); 
     GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(gridCols * pixel_size, gridRows * pixel_size));
-
-
-    float originX = MouseX - (static_cast<float>(pixel_size) * brushSize * 0.5f);
-    float originY = MouseY - (static_cast<float>(pixel_size) * brushSize * 0.5f);
-
-    BrushRenderer->DrawSprite(glm::vec2(originX, originY), glm::vec2(static_cast<float>(pixel_size * brushSize) , static_cast<float>(pixel_size * brushSize)));
+    BrushRenderer->DrawSprite(glm::vec2(brushOriginX, brushOriginY), glm::vec2(static_cast<float>(pixel_size * brushSize) , static_cast<float>(pixel_size * brushSize)));
 
 }
+
+void Game::UpdateDrawingArea() {
+
+    brushOriginX = MouseX - (static_cast<float>(pixel_size) * brushSize * 0.5f);
+    brushOriginY = MouseY - (static_cast<float>(pixel_size) * brushSize * 0.5f);
+
+}
+
+
 
 void Game::Simulator() {
 
