@@ -16,6 +16,7 @@
 
 SpriteRenderer *CubeRenderer;
 SpriteRenderer *GridRenderer;
+SpriteRenderer *BrushRenderer;
 
 Texture2D *gridTexture;
 
@@ -31,6 +32,7 @@ Game::~Game()
 {
    delete CubeRenderer;
    delete GridRenderer;
+   delete BrushRenderer;
 
    delete gridTexture;
    gridTexture = nullptr;
@@ -42,6 +44,7 @@ void Game::Init(int argc, char* argv[])
     // ResourceManager::LoadShader("Shaders/basicShader.vs", "Shaders/basicShader.fs", nullptr, "cube");
     ResourceManager::LoadShader("Shaders/quadShader.vs", "Shaders/quadShader.fs", nullptr, "grid");
     ResourceManager::LoadShader("Shaders/shaderText.vs", "Shaders/shaderText.fs", nullptr, "text");
+    ResourceManager::LoadShader("Shaders/brushShader.vs", "Shaders/brushShader.fs", nullptr, "brush");
 
     // Define the View Matrix - Game is oriented from top to bottom
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
@@ -51,6 +54,7 @@ void Game::Init(int argc, char* argv[])
     // ResourceManager::GetShader("cube").Use().SetMat4("projection", projection);
     ResourceManager::GetShader("grid").Use().SetInt("image", 0);
     ResourceManager::GetShader("grid").SetMat4("projection", projection);
+    ResourceManager::GetShader("brush").Use().SetMat4("projection", projection);
     ResourceManager::GetShader("text").Use().SetMat4("text", 0);
     ResourceManager::GetShader("text").SetMat4("projection", textProjection);
 
@@ -60,7 +64,11 @@ void Game::Init(int argc, char* argv[])
     Shader Shader = ResourceManager::GetShader("grid");
     GridRenderer = new SpriteRenderer(Shader);
 
+    Shader = ResourceManager::GetShader("brush");
+    BrushRenderer = new SpriteRenderer(Shader);
+
     pixel_size = 4;
+    brushSize = 1;
 
     gridCols = Width/pixel_size;
     gridRows =  Height/pixel_size;
@@ -187,13 +195,28 @@ void Game::ProcessInput(float dt)
         simulationSpeed *= 1.02f;
         simulationSpeed = glm::clamp(simulationSpeed, 0.0f, 10.0f);
         std::cout << "AUMENTOU" << std::endl;
+
     }
 
     if (Keys[GLFW_KEY_DOWN]) {
         simulationSpeed *= 0.98f;
         simulationSpeed = glm::clamp(simulationSpeed, 0.0f, 10.0f);
-        std::cout << "DIMINUIU" << std::endl;  
+        std::cout << "DIMINUIU" << std::endl; 
+        
     }
+
+    if (this->Keys[GLFW_KEY_MINUS]) {
+        
+        brushSize--;
+        brushSize = glm::clamp(brushSize, 1, 10);
+    }
+
+    if (this->Keys[GLFW_KEY_EQUAL]) {
+        
+        brushSize++;
+        brushSize = glm::clamp(brushSize, 1, 10);
+    }
+
 }
 
 void Game::Render()
@@ -201,6 +224,12 @@ void Game::Render()
     
     gridTexture->Update(this->grid.data()); 
     GridRenderer->DrawSprite(*gridTexture, glm::vec2(0.0f, 0.0f), glm::vec2(gridCols * pixel_size, gridRows * pixel_size));
+
+
+    float originX = MouseX - (static_cast<float>(pixel_size) * brushSize * 0.5f);
+    float originY = MouseY - (static_cast<float>(pixel_size) * brushSize * 0.5f);
+
+    BrushRenderer->DrawSprite(glm::vec2(originX, originY), glm::vec2(static_cast<float>(pixel_size * brushSize) , static_cast<float>(pixel_size * brushSize)));
 
 }
 

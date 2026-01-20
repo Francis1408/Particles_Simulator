@@ -54,6 +54,8 @@ class Game {
     int gridCols;
     int gridRows;
 
+    int brushSize;
+
     // Game Grids
     std::vector<uint8_t> grid;
     std::vector<uint8_t> pixel_buffer;
