@@ -83,14 +83,11 @@ void Game::Init(int argc, char* argv[])
     // Resize flags
     this->visited.resize(gridCols * gridRows, false);
 
-    this->pixel_buffer.resize(this->Width * this->Height * 4); // 4 Chanels (RGBA) -> 8 bits each
-    std::fill(this->pixel_buffer.begin(), this->pixel_buffer.end(), 0);
-    // Make alpha visible
-    for (int i = 0; i < Width * Height; i++)
-    {
-        pixel_buffer[i * 4 + 3] = 255; // Alpha
-    }
+    // Resize Velocity
+    this->velocityY.resize(gridCols * gridRows, 0.0f);
+    this->velocityX.resize(gridCols * gridRows, 0.0f);
 
+   
     gridTexture->Generate(gridCols, gridRows, nullptr);
 
 
@@ -165,6 +162,14 @@ void Game::ProcessInput(float dt)
 
         for(int i = 0; i < brushSize; i++) {
             for(int j = 0; j < brushSize; j++) {
+
+                // Generates randomly
+                if (this->currentElement != WALL) {
+
+                    double random_val = static_cast<double>(std::rand()) / RAND_MAX;
+                    std::cout << random_val << std::endl;
+                    if (random_val > 0.25) continue;
+                }
 
                 int cellX = startingCellX + j;
                 int cellY = startingCellY + i;
@@ -417,3 +422,13 @@ bool Game::Left(int currentCell) {
     return false;
 
 }
+
+void Game::MoveCell(int from, int to) {
+
+    std::swap(grid[from], grid[to]);
+    std::swap(velocityX[from], velocityX[to]);
+    std::swap(velocityY[from], velocityY[to]);
+
+}
+
+

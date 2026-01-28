@@ -60,7 +60,6 @@ class Game {
 
     // Game Grids
     std::vector<uint8_t> grid;
-    std::vector<uint8_t> pixel_buffer;
 
     // Element Flags
     u_int8_t currentElement;
@@ -69,6 +68,14 @@ class Game {
     // Physiscs
     std::array<Element, 256> elements;
     float gravity = 10.0f;
+
+    // ============ Vectorial measures ===============
+
+    // Velocity
+    std::vector<float> velocityX;
+    std::vector<float> velocityY;
+    float maxFallSpeed = 100.0f;
+
 
     // Initialize game state (load all shaders/textures/levels)
     void Init(int argc, char* argv[]);
@@ -89,6 +96,9 @@ class Game {
     bool DownRight(int currentCell);
     bool Left(int currentCell);
     bool Right(int currentCell);
+    void MoveCell(int from, int to);
+
+    
 
 
 };
